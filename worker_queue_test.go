@@ -8,8 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
-
 func TestNewWorkerStack(t *testing.T) {
 	size := 1000
 	q := newWorkerStack(size)
@@ -38,9 +36,9 @@ func TestBinarySearch(t *testing.T) {
 	require.EqualValues(t, -1, q.binarySearch(expiry1), "index should be -1")
 }
 
-func TestWorkerQueueStack(t *testing.T){
+func TestWorkerQueueStack(t *testing.T) {
 	q := newWorkerStack(0)
-	
+
 	for i := 0; i < 5; i++ {
 		q.insert(&goWorker{lastUsed: time.Now()})
 	}
@@ -51,15 +49,14 @@ func TestWorkerQueueStack(t *testing.T){
 
 	time.Sleep(time.Second)
 
-	
 	for i := 0; i < 100; i++ {
 		q.insert(&goWorker{lastUsed: time.Now()})
 	}
 
 	require.EqualValues(t, 104, q.len(), "workerQueue error")
 	q.refresh(time.Second)
-	
-	require.EqualValues(t, 100, q.len(),"workerQueue error")
+
+	require.EqualValues(t, 100, q.len(), "workerQueue error")
 }
 
 func TestExample(t *testing.T) {
@@ -76,7 +73,7 @@ func TestExample(t *testing.T) {
 
 	require.EqualValues(t, 10, len(arry))
 	for i := 5; i < 10; i++ {
-		require.EqualValues(t, i, arry[i - 5])
+		require.EqualValues(t, i, arry[i-5])
 	}
 
 	arry = arry[:cpNum]

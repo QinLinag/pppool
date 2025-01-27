@@ -7,9 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
-
-
 func TestNewWorkerLoopQueue(t *testing.T) {
 	q := newWorkerLoopQueue(10)
 	require.EqualValues(t, 10, q.size)
@@ -40,7 +37,6 @@ func TestNewWorkerLoopQueue(t *testing.T) {
 	require.EqualValues(t, 5, q.head)
 	require.EqualValues(t, 0, q.tail)
 
-
 	//tail < head的情况     测试tail是否能够正常循环
 	for i := 0; i < 4; i++ {
 		q.insert(&goWorker{lastUsed: time.Now()})
@@ -57,7 +53,7 @@ func TestNewWorkerLoopQueue(t *testing.T) {
 	require.EqualValues(t, 10, q.len())
 	require.EqualValues(t, 5, q.head)
 	require.EqualValues(t, 5, q.tail)
-	
+
 	//head < tail   测试head是否能正常循环
 
 	for i := 0; i < 5; i++ {
@@ -70,8 +66,6 @@ func TestNewWorkerLoopQueue(t *testing.T) {
 	require.EqualValues(t, false, q.isFull)
 	require.EqualValues(t, false, q.isEmpty())
 
-
-
 	q.reset()
 	require.EqualValues(t, 0, q.len())
 	require.EqualValues(t, 0, q.size)
@@ -79,9 +73,6 @@ func TestNewWorkerLoopQueue(t *testing.T) {
 	require.EqualValues(t, 0, q.tail)
 
 }
-
-
-
 
 func TestWorkerLoopQueueBinarySearch(t *testing.T) {
 	//test 1  不满，并且 tail > head=0
@@ -104,7 +95,6 @@ func TestWorkerLoopQueueBinarySearch(t *testing.T) {
 	require.EqualValues(t, 0, q2.tail)
 	require.EqualValues(t, -1, q2.binarySearch(expiry2), "index should be -1, means expiriedWorkder nums is 0")
 	require.EqualValues(t, 999, q2.binarySearch(time.Now()), "index should be 1, expiriedWorker nums is 1000")
-
 
 	//test 3 不满 tail > head > 0
 	q3 := newWorkerLoopQueue(1000)
@@ -165,7 +155,6 @@ func TestWorkerLoopQueueRefresh(t *testing.T) {
 	require.EqualValues(t, 0, q1.len())
 	require.EqualValues(t, 50, q1.head)
 	require.EqualValues(t, 50, q1.tail)
-	
 
 	//test 2
 	for i := 0; i < 100; i++ {
@@ -197,17 +186,17 @@ func TestWorkerLoopQueueRefresh(t *testing.T) {
 	require.EqualValues(t, 80, q1.len())
 	require.EqualValues(t, 50, q1.head)
 	require.EqualValues(t, 30, q1.tail)
-	require.EqualValues(t, 0, len(q1.refresh(3 * time.Second)), "不存在，最后一次运行时在3秒前的worker，")
+	require.EqualValues(t, 0, len(q1.refresh(3*time.Second)), "不存在，最后一次运行时在3秒前的worker，")
 	require.EqualValues(t, 80, q1.len())
 	require.EqualValues(t, 50, q1.head)
 	require.EqualValues(t, 30, q1.tail)
 
-	require.EqualValues(t, 40, len(q1.refresh(1 * time.Second)), "存活超过1s的全部是超时，有40个")
+	require.EqualValues(t, 40, len(q1.refresh(1*time.Second)), "存活超过1s的全部是超时，有40个")
 	require.EqualValues(t, 40, q1.len())
 
 	require.EqualValues(t, 90, q1.head)
 	require.EqualValues(t, 30, q1.tail)
-	
+
 	time.Sleep(time.Second)
 	//test 4
 	for i := 0; i < 40; i++ {

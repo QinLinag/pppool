@@ -8,14 +8,14 @@ type workerStack struct {
 }
 
 func newWorkerStack(size int) *workerStack {
-	return &workerStack {
+	return &workerStack{
 		items: make([]worker, 0, size),
 	}
 }
 
 //实现worker_queue的所有接口
 
-func (ws *workerStack) len() int{
+func (ws *workerStack) len() int {
 	return len(ws.items)
 }
 
@@ -29,13 +29,13 @@ func (ws *workerStack) insert(w worker) error {
 }
 
 func (ws *workerStack) detach() worker {
-	l := ws.len(); 
+	l := ws.len()
 	if l == 0 {
 		return nil
 	}
-	w := ws.items[l - 1]
-	ws.items[l - 1] = nil //避免内存泄漏
-	ws.items = ws.items[:l - 1]
+	w := ws.items[l-1]
+	ws.items[l-1] = nil //避免内存泄漏
+	ws.items = ws.items[:l-1]
 	return w
 }
 
@@ -47,18 +47,17 @@ func (ws *workerStack) refresh(duration time.Duration) []worker {
 
 	expiryTime := time.Now().Add(-duration)
 	index := ws.binarySearch(expiryTime)
-	ws.expiry = ws.expiry[:0]  //对一个空切片（nil）截取，是不会报错的
+	ws.expiry = ws.expiry[:0] //对一个空切片（nil）截取，是不会报错的
 	if index != -1 {
 		ws.expiry = append(ws.expiry, ws.items[:index]...)
-		m := copy(ws.items, ws.items[index + 1:])
+		m := copy(ws.items, ws.items[index+1:])
 		for i := m; i < n; i++ {
 			ws.items[i] = nil
 		}
-		ws.items = ws.items[:m]   //缩容
+		ws.items = ws.items[:m] //缩容
 	}
 	return ws.expiry
 }
-
 
 func (ws *workerStack) binarySearch(expiryTime time.Time) int {
 	left := 0
@@ -85,7 +84,7 @@ func (ws *workerStack) reset() {
 
 func (ws *workerStack) clean() {
 	if len(ws.expiry) == 0 {
-		return 
+		return
 	}
 	for i := range ws.expiry {
 		ws.expiry[i].finish()

@@ -5,12 +5,11 @@ import (
 	"pppool"
 	"sync"
 	"sync/atomic"
-
 )
 
-var(
+var (
 	sum int32
-	wg sync.WaitGroup
+	wg  sync.WaitGroup
 )
 
 func incSumInt(i int32) {
@@ -30,7 +29,7 @@ func ExamplePool() {
 		_ = pool.Submit(func() {
 			incSumInt(int32(j))
 		})
-	} 
+	}
 	wg.Wait()
 	fmt.Printf("The result is %d\n", sum)
 	fmt.Println("----")

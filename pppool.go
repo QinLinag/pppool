@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	DefaultPoolSize      = math.MaxInt32
+	DefaultPoolSize          = math.MaxInt32
 	DefaultCleanIntervalTime = time.Second
 )
 
@@ -25,20 +25,20 @@ const (
 )
 
 var (
-	ErrPoolOverload = errors.New("too many goroutines blocked on submit or Nonblocking is set")
-	ErrorPoolClosed = errors.New("the pool has been closed")
-	ErrInvalidPoolExpiry          = errors.New("invalid expiry for pool")
-	ErrInvalidPreAllocSize        = errors.New("can not set up a negative capacity under PreAlloc mode")
-	
+	ErrPoolOverload        = errors.New("too many goroutines blocked on submit or Nonblocking is set")
+	ErrorPoolClosed        = errors.New("the pool has been closed")
+	ErrInvalidPoolExpiry   = errors.New("invalid expiry for pool")
+	ErrInvalidPreAllocSize = errors.New("can not set up a negative capacity under PreAlloc mode")
+
 	workerChanCap = func() int {
-		if runtime.GOMAXPROCS(0) == 1{
+		if runtime.GOMAXPROCS(0) == 1 {
 			return 0
 		}
 		return 1
 	}()
-	
-	defaultLogger          Logger = Logger(log.New(os.Stderr, "[pppool]: ", log.LstdFlags|log.Lmsgprefix|log.Lmicroseconds))
-	defaultPool, _ = NewPool(DefaultPoolSize)
+
+	defaultLogger  Logger = Logger(log.New(os.Stderr, "[pppool]: ", log.LstdFlags|log.Lmsgprefix|log.Lmicroseconds))
+	defaultPool, _        = NewPool(DefaultPoolSize)
 )
 
 func Submit(task func()) error {
@@ -61,8 +61,6 @@ func Release() {
 	defaultPool.Release()
 }
 
-
-
 type Logger interface {
 	Printf(format string, args ...any)
 }
@@ -82,20 +80,20 @@ type poolCommon struct {
 
 	allDone chan struct{}
 
-	once *sync.Once  //并发协程只会执行一次，比如关闭资源、申请资源
+	once *sync.Once //并发协程只会执行一次，比如关闭资源、申请资源
 
 	workerCache sync.Pool //对象复用
 
-	waiting int32
+	waiting   int32
 	purgeDone int32
-	purgeCtx context.Context
+	purgeCtx  context.Context
 	stopPurge context.CancelFunc
 
 	ticktockDone int32
-	ticktockCtx context.Context
+	ticktockCtx  context.Context
 	stopticktock context.CancelFunc
 
-	now atomic.Value
+	now     atomic.Value
 	options *Options
 }
 
@@ -136,9 +134,9 @@ func newPool(size int, options ...Option) (*poolCommon, error) {
 		p.workers = newWorkerQueue(queueTypeStack, 0)
 	}
 	p.cond = *sync.NewCond(p.lock)
-	p.goPurge()  //开启一个协程去refresh过期的worker
+	p.goPurge()    //开启一个协程去refresh过期的worker
 	p.goTicktock() //开启一个协程去更新pool的时间
-	
+
 	return p, nil
 }
 
@@ -175,7 +173,7 @@ func (p *poolCommon) purgeStaleWorkers() {
 		}
 		// p.workers.clean()
 
-		//There might be a situation where all workers have been cleaned up 
+		//There might be a situation where all workers have been cleaned up
 		//while some invokers still are stuck in p.cond.Wait(), then we need to awake those invokers.
 		if isDormant && p.Waiting() > 0 {
 			p.cond.Broadcast()
@@ -184,7 +182,6 @@ func (p *poolCommon) purgeStaleWorkers() {
 }
 
 const nowTimeUpdateInterval = 500 * time.Millisecond
-
 
 func (p *poolCommon) ticktock() {
 	ticker := time.NewTicker(nowTimeUpdateInterval)
@@ -197,7 +194,7 @@ func (p *poolCommon) ticktock() {
 		select {
 		case <-ticktockCtx.Done():
 			return
-		case <- ticker.C:
+		case <-ticker.C:
 		}
 		if p.IsClosed() {
 			break
@@ -210,7 +207,7 @@ func (p *poolCommon) goPurge() {
 	if p.options.DisablePurge {
 		return
 	}
-	
+
 	p.purgeCtx, p.stopPurge = context.WithCancel(context.Background())
 	go p.purgeStaleWorkers()
 }
@@ -225,7 +222,7 @@ func (p *poolCommon) Waiting() int {
 	return int(atomic.LoadInt32(&p.waiting))
 }
 
-func (p *poolCommon) Running() int{
+func (p *poolCommon) Running() int {
 	return int(atomic.LoadInt32(&p.running))
 }
 
@@ -259,7 +256,7 @@ func (p *poolCommon) Release() {
 	p.cond.Broadcast()
 }
 
-func (p *poolCommon) Cap()int {
+func (p *poolCommon) Cap() int {
 	return int(atomic.LoadInt32(&p.capacity))
 }
 
@@ -270,7 +267,6 @@ func (p *poolCommon) addRunning(delta int) int {
 func (p *poolCommon) addWaiting(delta int) {
 	atomic.AddInt32(&p.waiting, int32(delta))
 }
-
 
 func (p *poolCommon) retrieveWorker() (w worker, err error) {
 	p.lock.Lock()

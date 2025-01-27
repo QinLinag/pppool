@@ -44,19 +44,18 @@ func (w *goWorker) run() {
 			//cal signal() here in case there are goroutines waiting for avaliable workers
 			w.pool.cond.Signal()
 		}()
-		
-		for fn := range w.task {  //阻塞等待人物
-			if fn == nil {  //finish
+
+		for fn := range w.task { //阻塞等待人物
+			if fn == nil { //finish
 				return
 			}
 			fn()
-			if ok := w.pool.revertWorker(w); !ok {  //将worker放入pool的worker queue中，
+			if ok := w.pool.revertWorker(w); !ok { //将worker放入pool的worker queue中，
 				return
 			}
 		}
 	}()
 }
-
 
 func (w *goWorker) finish() {
 	w.task <- nil

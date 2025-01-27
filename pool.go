@@ -4,7 +4,6 @@ type Pool struct {
 	*poolCommon
 }
 
-
 func (p *Pool) Submit(task func()) error {
 	if p.IsClosed() {
 		return ErrorPoolClosed
